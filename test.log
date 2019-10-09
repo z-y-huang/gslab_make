@@ -8,23 +8,23 @@ reading manifest file 'GSLab_Make.egg-info/SOURCES.txt'
 writing manifest file 'GSLab_Make.egg-info/SOURCES.txt'
 running build_ext
 ============================= test session starts ==============================
-platform darwin -- Python 2.7.13, pytest-3.2.1, py-1.4.34, pluggy-0.4.0
-rootdir: /Users/danielagonzalez/gslab_make, inifile:
+platform darwin -- Python 2.7.15, pytest-3.5.1, py-1.5.3, pluggy-0.6.0
+rootdir: /Users/zong/gslab_make, inifile:
 collected 72 items
 
-gslab_make/tests/test_clear_dir.py ...
-gslab_make/tests/test_execute_command.py .
-gslab_make/tests/test_remove_path.py .F..
-gslab_make/tests/test_run_lyx.py .FFFFF.FFF
-gslab_make/tests/test_run_mathematica.py .FFF.FF
-gslab_make/tests/test_run_matlab.py FFFF.FF
-gslab_make/tests/test_run_perl.py ......
-gslab_make/tests/test_run_python.py ......
-gslab_make/tests/test_run_r.py ......F.
-gslab_make/tests/test_run_stata.py ......
-gslab_make/tests/test_tablefill.py ....
-gslab_make/tests/test_textfill.py ........
-gslab_make/tests/test_zip.py ..
+gslab_make/tests/test_clear_dir.py ...                                   [  4%]
+gslab_make/tests/test_execute_command.py .                               [  5%]
+gslab_make/tests/test_remove_path.py .F..                                [ 11%]
+gslab_make/tests/test_run_lyx.py ........F.                              [ 25%]
+gslab_make/tests/test_run_mathematica.py .FFF.FF                         [ 34%]
+gslab_make/tests/test_run_matlab.py FFFF.FF                              [ 44%]
+gslab_make/tests/test_run_perl.py ......                                 [ 52%]
+gslab_make/tests/test_run_python.py ......                               [ 61%]
+gslab_make/tests/test_run_r.py ......F.                                  [ 72%]
+gslab_make/tests/test_run_stata.py ......                                [ 80%]
+gslab_make/tests/test_tablefill.py ....                                  [ 86%]
+gslab_make/tests/test_textfill.py .......F                               [ 97%]
+gslab_make/tests/test_zip.py ..                                          [100%]
 
 =================================== FAILURES ===================================
 ______________________ testRemovePath.test_default_noisy _______________________
@@ -38,570 +38,9 @@ self = <gslab_make.tests.test_remove_path.testRemovePath testMethod=test_default
                         remove_path('./output_local/')
         time.sleep(0.1)
 >       self.assertIn('Deleted:', open('stdout.txt').read())
-E       AssertionError: 'Deleted:' not found in 'Removed: "/Users/danielagonzalez/gslab_make/output_local"\n'
+E       AssertionError: 'Deleted:' not found in 'Removed: "/Users/zong/gslab_make/output_local"\n'
 
 gslab_make/tests/test_remove_path.py:38: AssertionError
-___________________________ testRunLyx.test_comments ___________________________
-
-self = <gslab_make.tests.test_run_lyx.testRunLyx testMethod=test_comments>
-
-    def test_comments(self):
-        makelog = {'makelog' : 'log/make.log', 'pdf_dir' : 'output'}
-        with nostderrout():
-            start_makelog(makelog)
->           run_lyx(makelog, program = 'gslab_make/tests/input/lyx_test_file.lyx', doctype = 'comments')
-
-gslab_make/tests/test_run_lyx.py:100: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-paths = {'makelog': 'log/make.log', 'pdf_dir': 'output'}
-program = 'gslab_make/tests/input/lyx_test_file.lyx'
-kwargs = {'doctype': 'comments'}, makelog = 'log/make.log', pdf_dir = 'output'
-direct = <gslab_make.private.programdirective.LyXDirective object at 0x10902eb90>
-temp_name = 'lyx_test_file_comments'
-temp_program = '/Users/danielagonzalez/gslab_make/gslab_make/tests/input/lyx_test_file_comments.lyx'
-beamer = False, line = '\\end_document\r\n'
-
-    def run_lyx(paths, program, **kwargs):
-        """ Run LyX script using system command.
-    
-        Parameters
-        ----------
-        paths : dict
-            Dictionary of paths. Dictionary should contain {
-                'makelog' : str
-                    Path of makelog.
-                'pdf_dir' : str
-                    Directory to write PDFs.
-            }
-        program : str
-            Path of script to run.
-        osname : str, optional
-            Name of OS. Defaults to `os.name`.
-        shell : bool, optional
-            See: https://docs.python.org/2/library/subprocess.html#frequently-used-arguments.
-            Defaults to `True`.
-        log : str, optional
-            Path of program log. Program log is only written if specified.
-        executable : str, optional
-            Executable to use for system command.
-            Defaults to executable specified in metadata.
-        option : str, optional
-            Options for system command. Defaults to options specified in metadata.
-        args : str, optional
-            Not applicable.
-        doctype : str, optional
-           Type of Lyx document. Takes either `handout` and `comments`.
-           Defaults to no special document type.
-    
-        Returns
-        -------
-        None
-        """
-    
-        makelog = paths['makelog']
-        pdf_dir = paths['pdf_dir']
-    
-        try:
-            direct = LyXDirective(pdf_dir = pdf_dir, application = 'lyx', program = program, makelog = makelog, **kwargs)
-    
-            # Make handout/commented LyX file
-            if direct.doctype:
-                temp_name = os.path.join(direct.program_name + '_' + direct.doctype)
-                temp_program = os.path.join(direct.program_dir, temp_name + '.lyx')
-    
-                beamer = False
-                shutil.copy2(direct.program, temp_program)
-    
-                for line in fileinput.input(temp_program, inplace = True):
-                    if r'\textclass beamer' in line:
-                        beamer = True
-                    if direct.doctype == 'handout' and r'\options' in line and beamer:
-                        line = line.rstrip('\n') + ', handout\n'
-                    elif direct.doctype == 'comments' and r'\begin_inset Note Note' in line:
-                        line = line.replace('Note Note', 'Note Greyedout')
-                    print(line)
-            else:
-                temp_name = direct.program_name
-                temp_program = direct.program
-    
-            # Execute
-            command = metadata.commands[direct.osname][direct.application] % (direct.executable, direct.option, temp_program)
-            exit_code, error_message = direct.execute_command(command)
-            direct.write_log()
-            if exit_code != 0:
->               raise CritError('* LyX program executed with errors: *\n%s' % error_message)
-E               CritError: * LyX program executed with errors: *
-E               /bin/sh: lyx: command not found
-
-gslab_make/run_program.py:399: CritError
-_________________________ testRunLyx.test_default_log __________________________
-
-self = <gslab_make.tests.test_run_lyx.testRunLyx testMethod=test_default_log>
-
-    def test_default_log(self):
-        makelog = {'makelog' : 'log/make.log', 'pdf_dir' : 'output'}
-        with nostderrout():
-            start_makelog(makelog)
->           run_lyx(makelog, program = 'gslab_make/tests/input/lyx_test_file.lyx')
-
-gslab_make/tests/test_run_lyx.py:23: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-paths = {'makelog': 'log/make.log', 'pdf_dir': 'output'}
-program = 'gslab_make/tests/input/lyx_test_file.lyx', kwargs = {}
-makelog = 'log/make.log', pdf_dir = 'output'
-direct = <gslab_make.private.programdirective.LyXDirective object at 0x1090eb290>
-temp_name = 'lyx_test_file'
-temp_program = '/Users/danielagonzalez/gslab_make/gslab_make/tests/input/lyx_test_file.lyx'
-
-    def run_lyx(paths, program, **kwargs):
-        """ Run LyX script using system command.
-    
-        Parameters
-        ----------
-        paths : dict
-            Dictionary of paths. Dictionary should contain {
-                'makelog' : str
-                    Path of makelog.
-                'pdf_dir' : str
-                    Directory to write PDFs.
-            }
-        program : str
-            Path of script to run.
-        osname : str, optional
-            Name of OS. Defaults to `os.name`.
-        shell : bool, optional
-            See: https://docs.python.org/2/library/subprocess.html#frequently-used-arguments.
-            Defaults to `True`.
-        log : str, optional
-            Path of program log. Program log is only written if specified.
-        executable : str, optional
-            Executable to use for system command.
-            Defaults to executable specified in metadata.
-        option : str, optional
-            Options for system command. Defaults to options specified in metadata.
-        args : str, optional
-            Not applicable.
-        doctype : str, optional
-           Type of Lyx document. Takes either `handout` and `comments`.
-           Defaults to no special document type.
-    
-        Returns
-        -------
-        None
-        """
-    
-        makelog = paths['makelog']
-        pdf_dir = paths['pdf_dir']
-    
-        try:
-            direct = LyXDirective(pdf_dir = pdf_dir, application = 'lyx', program = program, makelog = makelog, **kwargs)
-    
-            # Make handout/commented LyX file
-            if direct.doctype:
-                temp_name = os.path.join(direct.program_name + '_' + direct.doctype)
-                temp_program = os.path.join(direct.program_dir, temp_name + '.lyx')
-    
-                beamer = False
-                shutil.copy2(direct.program, temp_program)
-    
-                for line in fileinput.input(temp_program, inplace = True):
-                    if r'\textclass beamer' in line:
-                        beamer = True
-                    if direct.doctype == 'handout' and r'\options' in line and beamer:
-                        line = line.rstrip('\n') + ', handout\n'
-                    elif direct.doctype == 'comments' and r'\begin_inset Note Note' in line:
-                        line = line.replace('Note Note', 'Note Greyedout')
-                    print(line)
-            else:
-                temp_name = direct.program_name
-                temp_program = direct.program
-    
-            # Execute
-            command = metadata.commands[direct.osname][direct.application] % (direct.executable, direct.option, temp_program)
-            exit_code, error_message = direct.execute_command(command)
-            direct.write_log()
-            if exit_code != 0:
->               raise CritError('* LyX program executed with errors: *\n%s' % error_message)
-E               CritError: * LyX program executed with errors: *
-E               /bin/sh: lyx: command not found
-
-gslab_make/run_program.py:399: CritError
-__________________________ testRunLyx.test_executable __________________________
-
-self = <gslab_make.tests.test_run_lyx.testRunLyx testMethod=test_executable>
-
-    def test_executable(self):
-        makelog = {'makelog' : 'log/make.log', 'pdf_dir' : 'output'}
-        with nostderrout():
-            start_makelog(makelog)
->           run_lyx(makelog, program = 'gslab_make/tests/input/lyx_test_file.lyx', executable = metadata.default_executables[os.name]['lyx'])
-
-gslab_make/tests/test_run_lyx.py:45: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-paths = {'makelog': 'log/make.log', 'pdf_dir': 'output'}
-program = 'gslab_make/tests/input/lyx_test_file.lyx'
-kwargs = {'executable': 'lyx'}, makelog = 'log/make.log', pdf_dir = 'output'
-direct = <gslab_make.private.programdirective.LyXDirective object at 0x10906dfd0>
-temp_name = 'lyx_test_file'
-temp_program = '/Users/danielagonzalez/gslab_make/gslab_make/tests/input/lyx_test_file.lyx'
-
-    def run_lyx(paths, program, **kwargs):
-        """ Run LyX script using system command.
-    
-        Parameters
-        ----------
-        paths : dict
-            Dictionary of paths. Dictionary should contain {
-                'makelog' : str
-                    Path of makelog.
-                'pdf_dir' : str
-                    Directory to write PDFs.
-            }
-        program : str
-            Path of script to run.
-        osname : str, optional
-            Name of OS. Defaults to `os.name`.
-        shell : bool, optional
-            See: https://docs.python.org/2/library/subprocess.html#frequently-used-arguments.
-            Defaults to `True`.
-        log : str, optional
-            Path of program log. Program log is only written if specified.
-        executable : str, optional
-            Executable to use for system command.
-            Defaults to executable specified in metadata.
-        option : str, optional
-            Options for system command. Defaults to options specified in metadata.
-        args : str, optional
-            Not applicable.
-        doctype : str, optional
-           Type of Lyx document. Takes either `handout` and `comments`.
-           Defaults to no special document type.
-    
-        Returns
-        -------
-        None
-        """
-    
-        makelog = paths['makelog']
-        pdf_dir = paths['pdf_dir']
-    
-        try:
-            direct = LyXDirective(pdf_dir = pdf_dir, application = 'lyx', program = program, makelog = makelog, **kwargs)
-    
-            # Make handout/commented LyX file
-            if direct.doctype:
-                temp_name = os.path.join(direct.program_name + '_' + direct.doctype)
-                temp_program = os.path.join(direct.program_dir, temp_name + '.lyx')
-    
-                beamer = False
-                shutil.copy2(direct.program, temp_program)
-    
-                for line in fileinput.input(temp_program, inplace = True):
-                    if r'\textclass beamer' in line:
-                        beamer = True
-                    if direct.doctype == 'handout' and r'\options' in line and beamer:
-                        line = line.rstrip('\n') + ', handout\n'
-                    elif direct.doctype == 'comments' and r'\begin_inset Note Note' in line:
-                        line = line.replace('Note Note', 'Note Greyedout')
-                    print(line)
-            else:
-                temp_name = direct.program_name
-                temp_program = direct.program
-    
-            # Execute
-            command = metadata.commands[direct.osname][direct.application] % (direct.executable, direct.option, temp_program)
-            exit_code, error_message = direct.execute_command(command)
-            direct.write_log()
-            if exit_code != 0:
->               raise CritError('* LyX program executed with errors: *\n%s' % error_message)
-E               CritError: * LyX program executed with errors: *
-E               /bin/sh: lyx: command not found
-
-gslab_make/run_program.py:399: CritError
-________________________ testRunLyx.test_handout_pdfout ________________________
-
-self = <gslab_make.tests.test_run_lyx.testRunLyx testMethod=test_handout_pdfout>
-
-    def test_handout_pdfout(self):
-        makelog = {'makelog' : 'log/make.log', 'pdf_dir' : 'output'}
-        with nostderrout():
-            start_makelog(makelog)
->           run_lyx(makelog, program = 'gslab_make/tests/input/lyx_test_file.lyx', doctype = 'handout')
-
-gslab_make/tests/test_run_lyx.py:110: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-paths = {'makelog': 'log/make.log', 'pdf_dir': 'output'}
-program = 'gslab_make/tests/input/lyx_test_file.lyx'
-kwargs = {'doctype': 'handout'}, makelog = 'log/make.log', pdf_dir = 'output'
-direct = <gslab_make.private.programdirective.LyXDirective object at 0x1090eb850>
-temp_name = 'lyx_test_file_handout'
-temp_program = '/Users/danielagonzalez/gslab_make/gslab_make/tests/input/lyx_test_file_handout.lyx'
-beamer = False, line = '\\end_document\r\n'
-
-    def run_lyx(paths, program, **kwargs):
-        """ Run LyX script using system command.
-    
-        Parameters
-        ----------
-        paths : dict
-            Dictionary of paths. Dictionary should contain {
-                'makelog' : str
-                    Path of makelog.
-                'pdf_dir' : str
-                    Directory to write PDFs.
-            }
-        program : str
-            Path of script to run.
-        osname : str, optional
-            Name of OS. Defaults to `os.name`.
-        shell : bool, optional
-            See: https://docs.python.org/2/library/subprocess.html#frequently-used-arguments.
-            Defaults to `True`.
-        log : str, optional
-            Path of program log. Program log is only written if specified.
-        executable : str, optional
-            Executable to use for system command.
-            Defaults to executable specified in metadata.
-        option : str, optional
-            Options for system command. Defaults to options specified in metadata.
-        args : str, optional
-            Not applicable.
-        doctype : str, optional
-           Type of Lyx document. Takes either `handout` and `comments`.
-           Defaults to no special document type.
-    
-        Returns
-        -------
-        None
-        """
-    
-        makelog = paths['makelog']
-        pdf_dir = paths['pdf_dir']
-    
-        try:
-            direct = LyXDirective(pdf_dir = pdf_dir, application = 'lyx', program = program, makelog = makelog, **kwargs)
-    
-            # Make handout/commented LyX file
-            if direct.doctype:
-                temp_name = os.path.join(direct.program_name + '_' + direct.doctype)
-                temp_program = os.path.join(direct.program_dir, temp_name + '.lyx')
-    
-                beamer = False
-                shutil.copy2(direct.program, temp_program)
-    
-                for line in fileinput.input(temp_program, inplace = True):
-                    if r'\textclass beamer' in line:
-                        beamer = True
-                    if direct.doctype == 'handout' and r'\options' in line and beamer:
-                        line = line.rstrip('\n') + ', handout\n'
-                    elif direct.doctype == 'comments' and r'\begin_inset Note Note' in line:
-                        line = line.replace('Note Note', 'Note Greyedout')
-                    print(line)
-            else:
-                temp_name = direct.program_name
-                temp_program = direct.program
-    
-            # Execute
-            command = metadata.commands[direct.osname][direct.application] % (direct.executable, direct.option, temp_program)
-            exit_code, error_message = direct.execute_command(command)
-            direct.write_log()
-            if exit_code != 0:
->               raise CritError('* LyX program executed with errors: *\n%s' % error_message)
-E               CritError: * LyX program executed with errors: *
-E               /bin/sh: lyx: command not found
-
-gslab_make/run_program.py:399: CritError
-_______________________ testRunLyx.test_independent_log ________________________
-
-self = <gslab_make.tests.test_run_lyx.testRunLyx testMethod=test_independent_log>
-
-    def test_independent_log(self):
-        makelog = {'makelog' : 'log/make.log', 'pdf_dir' : 'output'}
-        independent_log = {'makelog' : 'log/lyx.log', 'pdf_dir' : 'output'}
-        with nostderrout():
-            start_makelog(makelog)
->           run_lyx(makelog, program = 'gslab_make/tests/input/lyx_test_file.lyx', log=independent_log['makelog'])
-
-gslab_make/tests/test_run_lyx.py:33: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-paths = {'makelog': 'log/make.log', 'pdf_dir': 'output'}
-program = 'gslab_make/tests/input/lyx_test_file.lyx'
-kwargs = {'log': 'log/lyx.log'}, makelog = 'log/make.log', pdf_dir = 'output'
-direct = <gslab_make.private.programdirective.LyXDirective object at 0x10906d410>
-temp_name = 'lyx_test_file'
-temp_program = '/Users/danielagonzalez/gslab_make/gslab_make/tests/input/lyx_test_file.lyx'
-
-    def run_lyx(paths, program, **kwargs):
-        """ Run LyX script using system command.
-    
-        Parameters
-        ----------
-        paths : dict
-            Dictionary of paths. Dictionary should contain {
-                'makelog' : str
-                    Path of makelog.
-                'pdf_dir' : str
-                    Directory to write PDFs.
-            }
-        program : str
-            Path of script to run.
-        osname : str, optional
-            Name of OS. Defaults to `os.name`.
-        shell : bool, optional
-            See: https://docs.python.org/2/library/subprocess.html#frequently-used-arguments.
-            Defaults to `True`.
-        log : str, optional
-            Path of program log. Program log is only written if specified.
-        executable : str, optional
-            Executable to use for system command.
-            Defaults to executable specified in metadata.
-        option : str, optional
-            Options for system command. Defaults to options specified in metadata.
-        args : str, optional
-            Not applicable.
-        doctype : str, optional
-           Type of Lyx document. Takes either `handout` and `comments`.
-           Defaults to no special document type.
-    
-        Returns
-        -------
-        None
-        """
-    
-        makelog = paths['makelog']
-        pdf_dir = paths['pdf_dir']
-    
-        try:
-            direct = LyXDirective(pdf_dir = pdf_dir, application = 'lyx', program = program, makelog = makelog, **kwargs)
-    
-            # Make handout/commented LyX file
-            if direct.doctype:
-                temp_name = os.path.join(direct.program_name + '_' + direct.doctype)
-                temp_program = os.path.join(direct.program_dir, temp_name + '.lyx')
-    
-                beamer = False
-                shutil.copy2(direct.program, temp_program)
-    
-                for line in fileinput.input(temp_program, inplace = True):
-                    if r'\textclass beamer' in line:
-                        beamer = True
-                    if direct.doctype == 'handout' and r'\options' in line and beamer:
-                        line = line.rstrip('\n') + ', handout\n'
-                    elif direct.doctype == 'comments' and r'\begin_inset Note Note' in line:
-                        line = line.replace('Note Note', 'Note Greyedout')
-                    print(line)
-            else:
-                temp_name = direct.program_name
-                temp_program = direct.program
-    
-            # Execute
-            command = metadata.commands[direct.osname][direct.application] % (direct.executable, direct.option, temp_program)
-            exit_code, error_message = direct.execute_command(command)
-            direct.write_log()
-            if exit_code != 0:
->               raise CritError('* LyX program executed with errors: *\n%s' % error_message)
-E               CritError: * LyX program executed with errors: *
-E               /bin/sh: lyx: command not found
-
-gslab_make/run_program.py:399: CritError
-____________________________ testRunLyx.test_option ____________________________
-
-self = <gslab_make.tests.test_run_lyx.testRunLyx testMethod=test_option>
-
-    def test_option(self):
-        makelog = {'makelog' : 'log/make.log', 'pdf_dir' : 'output'}
-        with nostderrout():
-            start_makelog(makelog)
->           run_lyx(makelog, program = 'gslab_make/tests/input/lyx_test_file.lyx', option = '-e pdf')
-
-gslab_make/tests/test_run_lyx.py:81: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-paths = {'makelog': 'log/make.log', 'pdf_dir': 'output'}
-program = 'gslab_make/tests/input/lyx_test_file.lyx'
-kwargs = {'option': '-e pdf'}, makelog = 'log/make.log', pdf_dir = 'output'
-direct = <gslab_make.private.programdirective.LyXDirective object at 0x1090eb4d0>
-temp_name = 'lyx_test_file'
-temp_program = '/Users/danielagonzalez/gslab_make/gslab_make/tests/input/lyx_test_file.lyx'
-
-    def run_lyx(paths, program, **kwargs):
-        """ Run LyX script using system command.
-    
-        Parameters
-        ----------
-        paths : dict
-            Dictionary of paths. Dictionary should contain {
-                'makelog' : str
-                    Path of makelog.
-                'pdf_dir' : str
-                    Directory to write PDFs.
-            }
-        program : str
-            Path of script to run.
-        osname : str, optional
-            Name of OS. Defaults to `os.name`.
-        shell : bool, optional
-            See: https://docs.python.org/2/library/subprocess.html#frequently-used-arguments.
-            Defaults to `True`.
-        log : str, optional
-            Path of program log. Program log is only written if specified.
-        executable : str, optional
-            Executable to use for system command.
-            Defaults to executable specified in metadata.
-        option : str, optional
-            Options for system command. Defaults to options specified in metadata.
-        args : str, optional
-            Not applicable.
-        doctype : str, optional
-           Type of Lyx document. Takes either `handout` and `comments`.
-           Defaults to no special document type.
-    
-        Returns
-        -------
-        None
-        """
-    
-        makelog = paths['makelog']
-        pdf_dir = paths['pdf_dir']
-    
-        try:
-            direct = LyXDirective(pdf_dir = pdf_dir, application = 'lyx', program = program, makelog = makelog, **kwargs)
-    
-            # Make handout/commented LyX file
-            if direct.doctype:
-                temp_name = os.path.join(direct.program_name + '_' + direct.doctype)
-                temp_program = os.path.join(direct.program_dir, temp_name + '.lyx')
-    
-                beamer = False
-                shutil.copy2(direct.program, temp_program)
-    
-                for line in fileinput.input(temp_program, inplace = True):
-                    if r'\textclass beamer' in line:
-                        beamer = True
-                    if direct.doctype == 'handout' and r'\options' in line and beamer:
-                        line = line.rstrip('\n') + ', handout\n'
-                    elif direct.doctype == 'comments' and r'\begin_inset Note Note' in line:
-                        line = line.replace('Note Note', 'Note Greyedout')
-                    print(line)
-            else:
-                temp_name = direct.program_name
-                temp_program = direct.program
-    
-            # Execute
-            command = metadata.commands[direct.osname][direct.application] % (direct.executable, direct.option, temp_program)
-            exit_code, error_message = direct.execute_command(command)
-            direct.write_log()
-            if exit_code != 0:
->               raise CritError('* LyX program executed with errors: *\n%s' % error_message)
-E               CritError: * LyX program executed with errors: *
-E               /bin/sh: lyx: command not found
-
-gslab_make/run_program.py:399: CritError
 _______________________ testRunLyx.test_path_with_space ________________________
 
 self = <gslab_make.tests.test_run_lyx.testRunLyx testMethod=test_path_with_space>
@@ -610,184 +49,13 @@ self = <gslab_make.tests.test_run_lyx.testRunLyx testMethod=test_path_with_space
         makelog = {'makelog' : 'log/make.log', 'pdf_dir' : 'output'}
         with nostderrout():
             start_makelog(makelog)
->           run_lyx(makelog, program = 'gslab_make/tests/input/lyx_test_file copy.lyx', executable = metadata.default_executables[os.name]['lyx'])
+            run_lyx(makelog, program = 'gslab_make/tests/input/lyx_test_file copy.lyx', executable = metadata.default_executables[os.name]['lyx'])
+        logfile_data = open(makelog['makelog'], 'rU').read()
+        self.assertIn('LaTeX', logfile_data)
+>       self.assertTrue(os.path.isfile('output/lyx_test_file.pdf'))
+E       AssertionError: False is not true
 
-gslab_make/tests/test_run_lyx.py:54: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-paths = {'makelog': 'log/make.log', 'pdf_dir': 'output'}
-program = 'gslab_make/tests/input/lyx_test_file copy.lyx'
-kwargs = {'executable': 'lyx'}, makelog = 'log/make.log', pdf_dir = 'output'
-direct = <gslab_make.private.programdirective.LyXDirective object at 0x10906dc50>
-temp_name = 'lyx_test_file copy'
-temp_program = '/Users/danielagonzalez/gslab_make/gslab_make/tests/input/lyx_test_file copy.lyx'
-
-    def run_lyx(paths, program, **kwargs):
-        """ Run LyX script using system command.
-    
-        Parameters
-        ----------
-        paths : dict
-            Dictionary of paths. Dictionary should contain {
-                'makelog' : str
-                    Path of makelog.
-                'pdf_dir' : str
-                    Directory to write PDFs.
-            }
-        program : str
-            Path of script to run.
-        osname : str, optional
-            Name of OS. Defaults to `os.name`.
-        shell : bool, optional
-            See: https://docs.python.org/2/library/subprocess.html#frequently-used-arguments.
-            Defaults to `True`.
-        log : str, optional
-            Path of program log. Program log is only written if specified.
-        executable : str, optional
-            Executable to use for system command.
-            Defaults to executable specified in metadata.
-        option : str, optional
-            Options for system command. Defaults to options specified in metadata.
-        args : str, optional
-            Not applicable.
-        doctype : str, optional
-           Type of Lyx document. Takes either `handout` and `comments`.
-           Defaults to no special document type.
-    
-        Returns
-        -------
-        None
-        """
-    
-        makelog = paths['makelog']
-        pdf_dir = paths['pdf_dir']
-    
-        try:
-            direct = LyXDirective(pdf_dir = pdf_dir, application = 'lyx', program = program, makelog = makelog, **kwargs)
-    
-            # Make handout/commented LyX file
-            if direct.doctype:
-                temp_name = os.path.join(direct.program_name + '_' + direct.doctype)
-                temp_program = os.path.join(direct.program_dir, temp_name + '.lyx')
-    
-                beamer = False
-                shutil.copy2(direct.program, temp_program)
-    
-                for line in fileinput.input(temp_program, inplace = True):
-                    if r'\textclass beamer' in line:
-                        beamer = True
-                    if direct.doctype == 'handout' and r'\options' in line and beamer:
-                        line = line.rstrip('\n') + ', handout\n'
-                    elif direct.doctype == 'comments' and r'\begin_inset Note Note' in line:
-                        line = line.replace('Note Note', 'Note Greyedout')
-                    print(line)
-            else:
-                temp_name = direct.program_name
-                temp_program = direct.program
-    
-            # Execute
-            command = metadata.commands[direct.osname][direct.application] % (direct.executable, direct.option, temp_program)
-            exit_code, error_message = direct.execute_command(command)
-            direct.write_log()
-            if exit_code != 0:
->               raise CritError('* LyX program executed with errors: *\n%s' % error_message)
-E               CritError: * LyX program executed with errors: *
-E               /bin/sh: lyx: command not found
-
-gslab_make/run_program.py:399: CritError
-____________________________ testRunLyx.test_pdfout ____________________________
-
-self = <gslab_make.tests.test_run_lyx.testRunLyx testMethod=test_pdfout>
-
-    def test_pdfout(self):
-        makelog = {'makelog' : 'log/make.log', 'pdf_dir' : 'log'}
-        with nostderrout():
-            start_makelog(makelog)
->           run_lyx(makelog, program = 'gslab_make/tests/input/lyx_test_file.lyx')
-
-gslab_make/tests/test_run_lyx.py:90: 
-_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
-
-paths = {'makelog': 'log/make.log', 'pdf_dir': 'log'}
-program = 'gslab_make/tests/input/lyx_test_file.lyx', kwargs = {}
-makelog = 'log/make.log', pdf_dir = 'log'
-direct = <gslab_make.private.programdirective.LyXDirective object at 0x10909d050>
-temp_name = 'lyx_test_file'
-temp_program = '/Users/danielagonzalez/gslab_make/gslab_make/tests/input/lyx_test_file.lyx'
-
-    def run_lyx(paths, program, **kwargs):
-        """ Run LyX script using system command.
-    
-        Parameters
-        ----------
-        paths : dict
-            Dictionary of paths. Dictionary should contain {
-                'makelog' : str
-                    Path of makelog.
-                'pdf_dir' : str
-                    Directory to write PDFs.
-            }
-        program : str
-            Path of script to run.
-        osname : str, optional
-            Name of OS. Defaults to `os.name`.
-        shell : bool, optional
-            See: https://docs.python.org/2/library/subprocess.html#frequently-used-arguments.
-            Defaults to `True`.
-        log : str, optional
-            Path of program log. Program log is only written if specified.
-        executable : str, optional
-            Executable to use for system command.
-            Defaults to executable specified in metadata.
-        option : str, optional
-            Options for system command. Defaults to options specified in metadata.
-        args : str, optional
-            Not applicable.
-        doctype : str, optional
-           Type of Lyx document. Takes either `handout` and `comments`.
-           Defaults to no special document type.
-    
-        Returns
-        -------
-        None
-        """
-    
-        makelog = paths['makelog']
-        pdf_dir = paths['pdf_dir']
-    
-        try:
-            direct = LyXDirective(pdf_dir = pdf_dir, application = 'lyx', program = program, makelog = makelog, **kwargs)
-    
-            # Make handout/commented LyX file
-            if direct.doctype:
-                temp_name = os.path.join(direct.program_name + '_' + direct.doctype)
-                temp_program = os.path.join(direct.program_dir, temp_name + '.lyx')
-    
-                beamer = False
-                shutil.copy2(direct.program, temp_program)
-    
-                for line in fileinput.input(temp_program, inplace = True):
-                    if r'\textclass beamer' in line:
-                        beamer = True
-                    if direct.doctype == 'handout' and r'\options' in line and beamer:
-                        line = line.rstrip('\n') + ', handout\n'
-                    elif direct.doctype == 'comments' and r'\begin_inset Note Note' in line:
-                        line = line.replace('Note Note', 'Note Greyedout')
-                    print(line)
-            else:
-                temp_name = direct.program_name
-                temp_program = direct.program
-    
-            # Execute
-            command = metadata.commands[direct.osname][direct.application] % (direct.executable, direct.option, temp_program)
-            exit_code, error_message = direct.execute_command(command)
-            direct.write_log()
-            if exit_code != 0:
->               raise CritError('* LyX program executed with errors: *\n%s' % error_message)
-E               CritError: * LyX program executed with errors: *
-E               /bin/sh: lyx: command not found
-
-gslab_make/run_program.py:399: CritError
+gslab_make/tests/test_run_lyx.py:57: AssertionError
 _____________________ testRunMathematica.test_default_log ______________________
 
 self = <gslab_make.tests.test_run_mathematica.testRunMathematica testMethod=test_default_log>
@@ -803,8 +71,8 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 paths = {'makelog': 'log/make.log'}
 program = 'gslab_make/tests/input/mathematica_test_script.m', kwargs = {}
 makelog = 'log/make.log'
-direct = <gslab_make.private.programdirective.ProgramDirective object at 0x109085b90>
-command = 'math < "/Users/danielagonzalez/gslab_make/gslab_make/tests/input/mathematica_test_script.m" -noprompt'
+direct = <gslab_make.private.programdirective.ProgramDirective object at 0x106f5b710>
+command = 'math < "/Users/zong/gslab_make/gslab_make/tests/input/mathematica_test_script.m" -noprompt'
 exit_code = 127
 error_message = "********************************************************************************
 Error with `run_mathematica`
@@ -876,8 +144,8 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 paths = {'makelog': 'log/make.log'}
 program = 'gslab_make/tests/input/mathematica_test_script.m'
 kwargs = {'executable': 'math'}, makelog = 'log/make.log'
-direct = <gslab_make.private.programdirective.ProgramDirective object at 0x10909dc10>
-command = 'math < "/Users/danielagonzalez/gslab_make/gslab_make/tests/input/mathematica_test_script.m" -noprompt'
+direct = <gslab_make.private.programdirective.ProgramDirective object at 0x106f10850>
+command = 'math < "/Users/zong/gslab_make/gslab_make/tests/input/mathematica_test_script.m" -noprompt'
 exit_code = 127
 error_message = "********************************************************************************
 Error with `run_mathematica`
@@ -950,8 +218,8 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 paths = {'makelog': 'log/make.log'}
 program = 'gslab_make/tests/input/mathematica_test_script.m', kwargs = {}
 makelog = 'log/make.log'
-direct = <gslab_make.private.programdirective.ProgramDirective object at 0x10909a210>
-command = 'math < "/Users/danielagonzalez/gslab_make/gslab_make/tests/input/mathematica_test_script.m" -noprompt'
+direct = <gslab_make.private.programdirective.ProgramDirective object at 0x106f44c90>
+command = 'math < "/Users/zong/gslab_make/gslab_make/tests/input/mathematica_test_script.m" -noprompt'
 exit_code = 127
 error_message = "********************************************************************************
 Error with `run_mathematica`
@@ -1024,8 +292,8 @@ paths = {'makelog': 'log/make.log'}
 program = 'gslab_make/tests/input/mathematica_test_script.m'
 kwargs = {'option': '-initfile gslab_make/tests/input/mathematica_init_script.m'}
 makelog = 'log/make.log'
-direct = <gslab_make.private.programdirective.ProgramDirective object at 0x109085e90>
-command = 'math < "/Users/danielagonzalez/gslab_make/gslab_make/tests/input/mathematica_test_script.m" -initfile gslab_make/tests/input/mathematica_init_script.m'
+direct = <gslab_make.private.programdirective.ProgramDirective object at 0x106f5bf90>
+command = 'math < "/Users/zong/gslab_make/gslab_make/tests/input/mathematica_test_script.m" -initfile gslab_make/tests/input/mathematica_init_script.m'
 exit_code = 127
 error_message = "********************************************************************************
 Error with `run_mathematica`
@@ -1097,8 +365,8 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 paths = {'makelog': 'log/make.log'}
 program = 'gslab_make/tests/input/mathematica_test_script copy.m'
 kwargs = {'executable': 'math'}, makelog = 'log/make.log'
-direct = <gslab_make.private.programdirective.ProgramDirective object at 0x1090a50d0>
-command = 'math < "/Users/danielagonzalez/gslab_make/gslab_make/tests/input/mathematica_test_script copy.m" -noprompt'
+direct = <gslab_make.private.programdirective.ProgramDirective object at 0x106f44a50>
+command = 'math < "/Users/zong/gslab_make/gslab_make/tests/input/mathematica_test_script copy.m" -noprompt'
 exit_code = 127
 error_message = "********************************************************************************
 Error with `run_mathematica`
@@ -1179,15 +447,14 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 paths = {'makelog': 'log/make.log'}
 program = 'gslab_make/tests/input/matlab_test_script.m', kwargs = {}
 makelog = 'log/make.log'
-direct = <gslab_make.private.programdirective.ProgramDirective object at 0x10909d110>
-program_log = '/Users/danielagonzalez/gslab_make/matlab_test_script.log'
-command = 'matlab -nosplash -nodesktop -r "try run(\'/Users/danielagonzalez/gslab_make/gslab_make/tests/input/matlab_test_script.m\'); catch e, fprintf(getReport(e)), exit(1); end; exit(0)" -logfile "matlab_test_script.log"'
-exit_code = 127
+direct = <gslab_make.private.programdirective.ProgramDirective object at 0x106f39710>
+program_log = '/Users/zong/gslab_make/matlab_test_script.log'
+command = 'matlab -nosplash -nodesktop -r "try run(\'/Users/zong/gslab_make/gslab_make/tests/input/matlab_test_script.m\'); catch e, fprintf(getReport(e)), exit(1); end; exit(0)" -logfile "matlab_test_script.log"'
+exit_code = 1
 error_message = "********************************************************************************
 Error with `run_matlab`
-************...rors: *\n%s' % error_message)
+************...('* Matlab program executed with errors: *\n%s' % error_message)
 CritError: * Matlab program executed with errors: *
-/bin/sh: matlab: command not found
 
 "
 
@@ -1237,11 +504,10 @@ CritError: * Matlab program executed with errors: *
             if exit_code != 0:
 >               raise CritError('* Matlab program executed with errors: *\n%s' % error_message)
 E               CritError: * Matlab program executed with errors: *
-E               /bin/sh: matlab: command not found
 
 gslab_make/run_program.py:122: CritError
 ----------------------------- Captured stdout call -----------------------------
-Executing: "matlab -nosplash -nodesktop -r "try run('/Users/danielagonzalez/gslab_make/gslab_make/tests/input/matlab_test_script.m'); catch e, fprintf(getReport(e)), exit(1); end; exit(0)" -logfile "matlab_test_script.log""
+Executing: "matlab -nosplash -nodesktop -r "try run('/Users/zong/gslab_make/gslab_make/tests/input/matlab_test_script.m'); catch e, fprintf(getReport(e)), exit(1); end; exit(0)" -logfile "matlab_test_script.log""
 ________________________ testRunMatlab.test_executable _________________________
 
 self = <gslab_make.tests.test_run_matlab.testRunMatlab testMethod=test_executable>
@@ -1257,15 +523,14 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 paths = {'makelog': 'log/make.log'}
 program = 'gslab_make/tests/input/matlab_test_script.m'
 kwargs = {'executable': 'matlab'}, makelog = 'log/make.log'
-direct = <gslab_make.private.programdirective.ProgramDirective object at 0x109085990>
-program_log = '/Users/danielagonzalez/gslab_make/matlab_test_script.log'
-command = 'matlab -nosplash -nodesktop -r "try run(\'/Users/danielagonzalez/gslab_make/gslab_make/tests/input/matlab_test_script.m\'); catch e, fprintf(getReport(e)), exit(1); end; exit(0)" -logfile "matlab_test_script.log"'
-exit_code = 127
+direct = <gslab_make.private.programdirective.ProgramDirective object at 0x106f2bf10>
+program_log = '/Users/zong/gslab_make/matlab_test_script.log'
+command = 'matlab -nosplash -nodesktop -r "try run(\'/Users/zong/gslab_make/gslab_make/tests/input/matlab_test_script.m\'); catch e, fprintf(getReport(e)), exit(1); end; exit(0)" -logfile "matlab_test_script.log"'
+exit_code = 1
 error_message = "********************************************************************************
 Error with `run_matlab`
-************...rors: *\n%s' % error_message)
+************...('* Matlab program executed with errors: *\n%s' % error_message)
 CritError: * Matlab program executed with errors: *
-/bin/sh: matlab: command not found
 
 "
 
@@ -1315,7 +580,6 @@ CritError: * Matlab program executed with errors: *
             if exit_code != 0:
 >               raise CritError('* Matlab program executed with errors: *\n%s' % error_message)
 E               CritError: * Matlab program executed with errors: *
-E               /bin/sh: matlab: command not found
 
 gslab_make/run_program.py:122: CritError
 ______________________ testRunMatlab.test_independent_log ______________________
@@ -1334,15 +598,14 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 paths = {'makelog': 'log/make.log'}
 program = 'gslab_make/tests/input/matlab_test_script.m'
 kwargs = {'log': 'log/matlab.log'}, makelog = 'log/make.log'
-direct = <gslab_make.private.programdirective.ProgramDirective object at 0x1090a50d0>
-program_log = '/Users/danielagonzalez/gslab_make/matlab_test_script.log'
-command = 'matlab -nosplash -nodesktop -r "try run(\'/Users/danielagonzalez/gslab_make/gslab_make/tests/input/matlab_test_script.m\'); catch e, fprintf(getReport(e)), exit(1); end; exit(0)" -logfile "matlab_test_script.log"'
-exit_code = 127
+direct = <gslab_make.private.programdirective.ProgramDirective object at 0x106f31910>
+program_log = '/Users/zong/gslab_make/matlab_test_script.log'
+command = 'matlab -nosplash -nodesktop -r "try run(\'/Users/zong/gslab_make/gslab_make/tests/input/matlab_test_script.m\'); catch e, fprintf(getReport(e)), exit(1); end; exit(0)" -logfile "matlab_test_script.log"'
+exit_code = 1
 error_message = "********************************************************************************
 Error with `run_matlab`
-************...rors: *\n%s' % error_message)
+************...('* Matlab program executed with errors: *\n%s' % error_message)
 CritError: * Matlab program executed with errors: *
-/bin/sh: matlab: command not found
 
 "
 
@@ -1392,7 +655,6 @@ CritError: * Matlab program executed with errors: *
             if exit_code != 0:
 >               raise CritError('* Matlab program executed with errors: *\n%s' % error_message)
 E               CritError: * Matlab program executed with errors: *
-E               /bin/sh: matlab: command not found
 
 gslab_make/run_program.py:122: CritError
 __________________________ testRunMatlab.test_option ___________________________
@@ -1410,15 +672,14 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 paths = {'makelog': 'log/make.log'}
 program = 'gslab_make/tests/input/matlab_test_script.m'
 kwargs = {'option': '-h'}, makelog = 'log/make.log'
-direct = <gslab_make.private.programdirective.ProgramDirective object at 0x1091581d0>
-program_log = '/Users/danielagonzalez/gslab_make/matlab_test_script.log'
-command = 'matlab -h -r "try run(\'/Users/danielagonzalez/gslab_make/gslab_make/tests/input/matlab_test_script.m\'); catch e, fprintf(getReport(e)), exit(1); end; exit(0)" -logfile "matlab_test_script.log"'
-exit_code = 127
+direct = <gslab_make.private.programdirective.ProgramDirective object at 0x106f3c8d0>
+program_log = '/Users/zong/gslab_make/matlab_test_script.log'
+command = 'matlab -h -r "try run(\'/Users/zong/gslab_make/gslab_make/tests/input/matlab_test_script.m\'); catch e, fprintf(getReport(e)), exit(1); end; exit(0)" -logfile "matlab_test_script.log"'
+exit_code = 1
 error_message = "********************************************************************************
 Error with `run_matlab`
-************...rors: *\n%s' % error_message)
+************...('* Matlab program executed with errors: *\n%s' % error_message)
 CritError: * Matlab program executed with errors: *
-/bin/sh: matlab: command not found
 
 "
 
@@ -1468,7 +729,6 @@ CritError: * Matlab program executed with errors: *
             if exit_code != 0:
 >               raise CritError('* Matlab program executed with errors: *\n%s' % error_message)
 E               CritError: * Matlab program executed with errors: *
-E               /bin/sh: matlab: command not found
 
 gslab_make/run_program.py:122: CritError
 ___________________________ testRunMatlab.test_wait ____________________________
@@ -1486,15 +746,14 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 paths = {'makelog': 'log/make.log'}
 program = 'gslab_make/tests/input/matlab_test_script_wait1.m', kwargs = {}
 makelog = 'log/make.log'
-direct = <gslab_make.private.programdirective.ProgramDirective object at 0x1090cc390>
-program_log = '/Users/danielagonzalez/gslab_make/matlab_test_script_wait1.log'
-command = 'matlab -nosplash -nodesktop -r "try run(\'/Users/danielagonzalez/gslab_make/gslab_make/tests/input/matlab_test_script_wait1.m\'); catch e, fprintf(getReport(e)), exit(1); end; exit(0)" -logfile "matlab_test_script_wait1.log"'
-exit_code = 127
+direct = <gslab_make.private.programdirective.ProgramDirective object at 0x106f44490>
+program_log = '/Users/zong/gslab_make/matlab_test_script_wait1.log'
+command = 'matlab -nosplash -nodesktop -r "try run(\'/Users/zong/gslab_make/gslab_make/tests/input/matlab_test_script_wait1.m\'); catch e, fprintf(getReport(e)), exit(1); end; exit(0)" -logfile "matlab_test_script_wait1.log"'
+exit_code = 1
 error_message = "********************************************************************************
 Error with `run_matlab`
-************...rors: *\n%s' % error_message)
+************...('* Matlab program executed with errors: *\n%s' % error_message)
 CritError: * Matlab program executed with errors: *
-/bin/sh: matlab: command not found
 
 "
 
@@ -1544,7 +803,6 @@ CritError: * Matlab program executed with errors: *
             if exit_code != 0:
 >               raise CritError('* Matlab program executed with errors: *\n%s' % error_message)
 E               CritError: * Matlab program executed with errors: *
-E               /bin/sh: matlab: command not found
 
 gslab_make/run_program.py:122: CritError
 ________________________ testRunR.test_path_with_space _________________________
@@ -1562,8 +820,8 @@ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
 paths = {'makelog': 'log/make.log'}
 program = 'gslab_make/tests/input/R_test_script copy.R'
 kwargs = {'executable': 'R CMD BATCH'}, makelog = 'log/make.log'
-direct = <gslab_make.private.programdirective.ProgramDirective object at 0x109111a50>
-command = 'R CMD BATCH --no-save "/Users/danielagonzalez/gslab_make/gslab_make/tests/input/R_test_script copy.R"'
+direct = <gslab_make.private.programdirective.ProgramDirective object at 0x106f67e50>
+command = 'R CMD BATCH --no-save "/Users/zong/gslab_make/gslab_make/tests/input/R_test_script copy.R"'
 exit_code = 2
 error_message = "********************************************************************************
 Error with `run_r`
@@ -1618,7 +876,20 @@ CritError: * R program executed with errors: *
 E               CritError: * R program executed with errors: *
 
 gslab_make/run_program.py:461: CritError
-===================== 21 failed, 51 passed in 9.98 seconds =====================
+______________________ testTextfill.test_tags_not_closed _______________________
+
+self = <gslab_make.tests.test_textfill.testTextfill testMethod=test_tags_not_closed>
+
+    def test_tags_not_closed(self):
+        with nostderrout():
+            error = textfill(input    = 'gslab_make/tests/input/tags_not_closed.log',
+                             template = 'gslab_make/tests/input/textfill_template.lyx',
+                             output   = './build/textfill_template_filled.lyx')
+>       self.assertIn('HTMLParseError', error)
+E       AssertionError: 'HTMLParseError' not found in 'Traceback (most recent call last):\n  File "/Users/zong/gslab_make/gslab_make/textfill.py", line 18, in textfill\n    text = parse_text(args)\n  File "/Users/zong/gslab_make/gslab_make/textfill.py", line 60, in parse_text\n    text = read_text(args[\'input\'], args[\'prefix\'])\n  File "/Users/zong/gslab_make/gslab_make/textfill.py", line 74, in read_text\n    text.close()\n  File "/Users/zong/gslab_make/gslab_make/textfill.py", line 110, in close\n    raise CritError(\'Tag %s is not closed\' % tag)\nCritError: Tag tag is not closed\n'
+
+gslab_make/tests/test_textfill.py:78: AssertionError
+==================== 15 failed, 57 passed in 81.61 seconds =====================
 Name                                       Stmts   Miss Branch BrPart  Cover   Missing
 --------------------------------------------------------------------------------------
 gslab_make/check_links.py                     37     27      2      0    26%   29-37, 62-84
@@ -1630,14 +901,14 @@ gslab_make/private/messages.py                23      0      0      0   100%
 gslab_make/private/metadata.py                 7      0      0      0   100%
 gslab_make/private/programdirective.py       107     13     32      9    84%   64, 95, 110-113, 126, 218, 264, 295-296, 337-338, 63->64, 94->95, 124->130, 125->126, 217->218, 262->268, 263->264, 269->exit, 336->337
 gslab_make/private/utility.py                 46     26     12      1    36%   46-63, 82-94, 16->23
-gslab_make/run_program.py                    183     45     34      6    73%   123, 313-328, 384, 386, 402-411, 503-523, 560-565, 121->123, 272->exit, 383->384, 385->386, 398->402, 559->560
+gslab_make/run_program.py                    183     38     34      6    78%   123, 313-328, 384, 386, 503-523, 560-565, 121->123, 272->exit, 383->384, 385->386, 405->410, 559->560
 gslab_make/tablefill.py                      143      5     68     10    93%   56, 108, 141, 174, 177, 35->38, 38->40, 55->56, 86->exit, 94->91, 107->108, 125->122, 140->141, 170->174, 176->177
 gslab_make/tablefill_info.py                   0      0      0      0   100%
 gslab_make/tests/nostderrout.py               12      0      2      0   100%
 gslab_make/tests/test_clear_dir.py            41      2      8      1    94%   55-56, 54->55
 gslab_make/tests/test_execute_command.py      31      3      8      4    82%   26, 39-40, 23->26, 33->35, 35->exit, 38->39
 gslab_make/tests/test_remove_path.py          56      3      6      2    92%   63, 68-69, 62->63, 67->68
-gslab_make/tests/test_run_lyx.py             108     32      8      4    69%   24-26, 34-39, 46-48, 55-57, 82-84, 91-94, 101-104, 111-114, 125-126, 117->119, 119->121, 121->exit, 124->125
+gslab_make/tests/test_run_lyx.py             108      2      8      4    95%   125-126, 117->119, 119->121, 121->exit, 124->125
 gslab_make/tests/test_run_mathematica.py      68     15     10      5    74%   25-26, 33-36, 42-43, 49-50, 68, 76, 78, 81-82, 71->73, 73->75, 75->76, 77->78, 80->81
 gslab_make/tests/test_run_matlab.py           72     23      8      3    65%   24-25, 32-35, 41-42, 47-48, 60-64, 70-73, 76-78, 87-88, 81->83, 83->exit, 86->87
 gslab_make/tests/test_run_perl.py             65      2      8      3    93%   77-78, 69->71, 71->73, 76->77
@@ -1647,9 +918,9 @@ gslab_make/tests/test_run_stata.py            62      3      8      4    90%   7
 gslab_make/tests/test_tablefill.py            96      2     42      6    94%   143-144, 20->exit, 37->34, 57->43, 74->exit, 138->exit, 142->143
 gslab_make/tests/test_textfill.py             83      2     12      3    95%   138-139, 17->exit, 133->exit, 137->138
 gslab_make/tests/test_zip.py                  35      2      4      2    90%   45-46, 41->exit, 44->45
-gslab_make/textfill.py                       137      2     60      5    96%   47, 173, 35->38, 38->40, 46->47, 103->exit, 172->173
+gslab_make/textfill.py                       138      2     60      5    96%   48, 174, 36->39, 39->41, 47->48, 104->exit, 173->174
 gslab_make/textfill_info.py                    0      0      0      0   100%
 gslab_make/write_link_logs.py                 31     23      2      0    24%   52-71, 88-95
 gslab_make/write_logs.py                      88     55     22      3    33%   69-84, 111, 152-172, 197-207, 227-246, 40->exit, 107->exit, 110->111
 --------------------------------------------------------------------------------------
-TOTAL                                       1866    399    428     81    76%
+TOTAL                                       1867    362    428     81    78%

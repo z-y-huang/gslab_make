@@ -1,0 +1,23 @@
+
+                            < M A T L A B (R) >
+                  Copyright 1984-2016 The MathWorks, Inc.
+                   R2016b (9.1.0.441655) 64-bit (maci64)
+                             September 7, 2016
+
+ 
+To get started, type one of these: helpwin, helpdesk, or demo.
+For product information, visit www.mathworks.com.
+ 
+
+test =
+
+    0.8147
+
+Error using save
+Cannot create 'matlab_test.mat' because '../../output' does not exist.
+
+Error in matlab_test_script (line 3)
+save('../../output/matlab_test.mat')
+
+Error in run (line 96)
+evalin('caller', [script ';']);
