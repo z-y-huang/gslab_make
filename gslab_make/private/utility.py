@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 from __future__ import absolute_import, division, print_function, unicode_literals
-from future.utils import raise_from
+from future.utils import raise_from, string_types
 from builtins import (bytes, str, open, super, range,
                       zip, round, input, int, pow, object)
 
@@ -14,8 +14,19 @@ import gslab_make.private.messages as messages
 from gslab_make.private.exceptionclasses import CritError
 
 
+def convert_to_list(obj, type):
+    """Convert object to list."""
+    if isinstance(obj, string_types):
+        obj = [obj]
+    if type(obj) is not list:
+        if (type == 'dir'):
+            raise_from(TypeError(messages.type_error_dir_list % obj), None)
+        if (type == 'file'):
+            raise_from(TypeError(messages.type_error_file_list % obj), None)
+
+
 def norm_path(path):
-    """ Normalizes path to be OS-compatible. """
+    """Normalize path to be OS-compatible."""
 
     if path:
         path = re.split('[/\\\\]+', path)
@@ -26,19 +37,36 @@ def norm_path(path):
     return path
 
 
-def get_path(paths_dict, key):
-    """ Get path for key. """
+def get_path(paths_dict, key, throw_error = True):
+    """Get path for key.
 
+    Parameters
+    ----------
+    path_dict : dict
+        Dictionary of paths.
+    key : str
+        Path to get from dictionary.
+    throw_error : bool
+        Return error instead of `None`. Defaults to `True`. 
+
+    Returns
+    -------
+    path : str
+        Path requested.
+    """
     try:
         path = paths_dict[key]
     except KeyError:
-        raise_from(CritError(messages.crit_error_no_key % (key, key)), None)
+        if throw_error:
+            raise_from(CritError(messages.crit_error_no_key % (key, key)), None)
+        else:
+            path = None
 
     return(path)
 
 
 def glob_recursive(path, depth, quiet = True):
-    """ Walks through path. 
+    """Walks through path. 
     
     Notes
     -----
@@ -81,7 +109,7 @@ def glob_recursive(path, depth, quiet = True):
 
  
 def file_to_array(file_name):
-    """ Read file and extract lines to list. 
+    """Read file and extract lines to list. 
 
     Parameters
     ----------
@@ -103,7 +131,7 @@ def file_to_array(file_name):
 
 
 def format_traceback(trace = ''):
-    """ Format traceback message.
+    """Format traceback message.
 
     Parameters
     ----------
@@ -112,7 +140,7 @@ def format_traceback(trace = ''):
 
     Notes
     -----
-    Format traceback for readability to pass into user messages. 
+    Format trackback for readability to pass into user messages. 
 
     Returns
     -------
@@ -130,7 +158,7 @@ def format_traceback(trace = ''):
 
 
 def format_message(message):
-    """ Format message. """
+    """Format message."""
 
     message = message.strip()
     star_line = '*' * (len(message) + 4)
@@ -141,7 +169,7 @@ def format_message(message):
 
 
 def format_list(list):
-    """ Format list. 
+    """Format list. 
 
     Parameters
     ----------
@@ -163,12 +191,12 @@ def format_list(list):
     
     return(formatted)
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
-# Following functions are not currently actively used in code base #
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# ~~~~~~~~~~ #
+# DEPRECATED #
+# ~~~~~~~~~~ #
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
 def check_duplicate(original, copy): 
-    """ Check duplicate.
+    """Check duplicate.
 
     Parameters
     ----------
@@ -198,7 +226,7 @@ def check_duplicate(original, copy):
     
 
 def parse_dircmp(dircmp):
-    """ Parse dircmp to see if directories duplicate. 
+    """Parse dircmp to see if directories duplicate. 
 
     Parameters
     ----------
